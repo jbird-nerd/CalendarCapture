@@ -1,14 +1,17 @@
 package com.example.calendarcapture
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.calendarcapture.databinding.ActivityMainBinding
@@ -27,6 +30,17 @@ class MainActivity : AppCompatActivity() {
     private var currentOcrText: String = ""
     private var currentEvent: EventData? = null
 
+    // Image picker launcher
+    private val imagePickerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                loadImageFromUri(uri)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -36,17 +50,27 @@ class MainActivity : AppCompatActivity() {
         setupClickListeners()
 
         // Handle shared image or text
-        when (intent?.action) {
+        val isShare = when (intent?.action) {
             Intent.ACTION_SEND -> {
                 if (intent.type?.startsWith("image/") == true) {
                     handleSharedImage(intent)
+                    true
                 } else if (intent.type == "text/plain") {
                     handleSharedText(intent)
-                }
+                    true
+                } else false
             }
             Intent.ACTION_PROCESS_TEXT -> {
                 handleProcessText(intent)
+                true
             }
+            else -> false
+        }
+
+        // Show manual entry if NOT a share
+        if (!isShare) {
+            binding.manualEntryCard.visibility = View.VISIBLE
+            prefsHelper.addLog("App launched directly - showing manual entry", "INFO")
         }
     }
 
@@ -61,10 +85,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.btnReprocess.setOnClickListener {
-            // Get the edited OCR text
             currentOcrText = binding.tvOcrText.text.toString()
-
-            // Reparse with the edited text
             val settings = prefsHelper.getSettings()
             showLoading("Reparsing text...")
 
@@ -74,11 +95,35 @@ class MainActivity : AppCompatActivity() {
                     currentEvent = event
                     displayEvent(event)
                     hideLoading()
+                    prefsHelper.addLog("Reprocessed text successfully", "INFO")
                 } catch (e: Exception) {
                     hideLoading()
                     showError("Error reparsing: ${e.message}")
+                    prefsHelper.addLog("Reprocess error: ${e.message}", "ERROR")
                 }
             }
+        }
+
+        // Manual entry buttons
+        binding.btnParseText.setOnClickListener {
+            val text = binding.editManualText.text.toString()
+            if (text.isNotEmpty()) {
+                binding.manualEntryCard.visibility = View.GONE
+                processText(text)
+            } else {
+                Toast.makeText(this, "Please enter some text", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        binding.btnUploadImage.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            imagePickerLauncher.launch(intent)
+        }
+
+        // Logo click
+        binding.logoPositiveRdMain.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://positiverandd.com"))
+            startActivity(intent)
         }
     }
 
@@ -123,10 +168,12 @@ class MainActivity : AppCompatActivity() {
                 currentBitmap = bitmap
                 binding.imagePreview.setImageBitmap(bitmap)
                 binding.imagePreview.visibility = View.VISIBLE
+                binding.manualEntryCard.visibility = View.GONE
                 processImage(bitmap)
             }
         } catch (e: Exception) {
             showError("Failed to load image: ${e.message}")
+            prefsHelper.addLog("Image load error: ${e.message}", "ERROR")
         }
     }
 
@@ -134,10 +181,10 @@ class MainActivity : AppCompatActivity() {
         val settings = prefsHelper.getSettings()
 
         showLoading("Processing image...")
+        prefsHelper.addLog("Starting OCR with ${settings.ocrMethod}", "INFO")
 
         lifecycleScope.launch {
             try {
-                // Step 1: OCR
                 updateStatus("Extracting text...")
                 val text = when (settings.ocrMethod) {
                     "mlkit" -> ocrHandler.performOcr(bitmap)
@@ -150,22 +197,26 @@ class MainActivity : AppCompatActivity() {
 
                 if (text.isEmpty()) {
                     showError("No text found in image")
+                    prefsHelper.addLog("OCR returned empty text", "WARN")
                     hideLoading()
                     return@launch
                 }
 
-                // Step 2: Parse
+                prefsHelper.addLog("OCR extracted ${text.length} chars", "INFO")
+
                 updateStatus("Parsing event details...")
                 val event = apiService.performParse(settings.parseMethod, text, settings)
                 currentEvent = event
 
-                // Step 3: Display results
+                prefsHelper.addLog("Parsed: ${event.title} on ${event.start}", "INFO")
+
                 displayEvent(event)
                 hideLoading()
 
             } catch (e: Exception) {
                 hideLoading()
                 showError("Error: ${e.message}")
+                prefsHelper.addLog("Processing error: ${e.message}", "ERROR")
                 e.printStackTrace()
             }
         }
@@ -179,16 +230,19 @@ class MainActivity : AppCompatActivity() {
         binding.ocrTextCard.visibility = View.VISIBLE
 
         showLoading("Parsing event details...")
+        prefsHelper.addLog("Parsing text (${text.length} chars) with ${settings.parseMethod}", "INFO")
 
         lifecycleScope.launch {
             try {
                 val event = apiService.performParse(settings.parseMethod, text, settings)
                 currentEvent = event
+                prefsHelper.addLog("Parsed: ${event.title} on ${event.start}", "INFO")
                 displayEvent(event)
                 hideLoading()
             } catch (e: Exception) {
                 hideLoading()
                 showError("Error parsing: ${e.message}")
+                prefsHelper.addLog("Parse error: ${e.message}", "ERROR")
                 e.printStackTrace()
             }
         }
@@ -207,34 +261,24 @@ class MainActivity : AppCompatActivity() {
             btnAddToCalendar.visibility = View.VISIBLE
             btnReprocess.visibility = View.VISIBLE
 
-            // Title
             editTitle.setText(event.title)
-
-            // Location
             editLocation.setText(event.location)
-
-            // All-day checkbox
             checkboxAllDay.isChecked = event.isAllDay
 
-            // Start date/time
             event.start?.let { start ->
                 val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
                 editStartDate.setText(start.format(dateFormatter))
                 editStartTime.setText(start.format(timeFormatter))
                 editStartTime.isEnabled = !event.isAllDay
             }
 
-            // End date/time
             event.end?.let { end ->
                 val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-
                 editEndDate.setText(end.format(dateFormatter))
                 editEndTime.setText(end.format(timeFormatter))
                 editEndTime.isEnabled = !event.isAllDay
             }
 
-            // Recurrence
             if (event.recurrence.isNotEmpty()) {
                 tvRecurrence.text = "Repeats: ${parseRecurrenceToHuman(event.recurrence)}"
                 tvRecurrence.visibility = View.VISIBLE
@@ -242,7 +286,6 @@ class MainActivity : AppCompatActivity() {
                 tvRecurrence.visibility = View.GONE
             }
 
-            // All-day toggle
             checkboxAllDay.setOnCheckedChangeListener { _, isChecked ->
                 editStartTime.isEnabled = !isChecked
                 editEndTime.isEnabled = !isChecked
@@ -307,7 +350,6 @@ class MainActivity : AppCompatActivity() {
                 event.end
             }
 
-            // Get edited values from UI
             val editedEvent = event.copy(
                 title = binding.editTitle.text.toString(),
                 location = binding.editLocation.text.toString(),
@@ -319,12 +361,13 @@ class MainActivity : AppCompatActivity() {
             val intent = calendarHelper.createCalendarIntent(this, editedEvent, currentOcrText)
             startActivity(intent)
             Toast.makeText(this, "Opening calendar...", Toast.LENGTH_SHORT).show()
+            prefsHelper.addLog("Event added: ${editedEvent.title}", "INFO")
 
-            // Close the activity after adding to calendar
             finish()
 
         } catch (e: Exception) {
             showError("Failed to open calendar: ${e.message}")
+            prefsHelper.addLog("Calendar error: ${e.message}", "ERROR")
         }
     }
 

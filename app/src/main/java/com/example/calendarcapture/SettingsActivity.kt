@@ -1,5 +1,7 @@
 package com.example.calendarcapture
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.MenuItem
 import android.widget.Toast
@@ -18,6 +20,7 @@ class SettingsActivity : AppCompatActivity() {
         setupToolbar()
         loadSettings()
         setupClickListeners()
+        loadLog()
     }
 
     private fun setupToolbar() {
@@ -69,6 +72,24 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnSave.setOnClickListener {
             saveSettings()
         }
+
+        // Log controls
+        binding.btnClearLog.setOnClickListener {
+            prefsHelper.clearLog()
+            loadLog()
+            Toast.makeText(this, "Log cleared", Toast.LENGTH_SHORT).show()
+        }
+
+        // Logo click to open website
+        binding.logoPositiveRd.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://positiverandd.com"))
+            startActivity(intent)
+        }
+    }
+
+    // Load and display log
+    private fun loadLog() {
+        binding.tvLog.text = prefsHelper.getLog()
     }
 
     private fun saveSettings() {
@@ -112,8 +133,6 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         prefsHelper.saveSettings(settings)
-
-        // Save time format preference
         prefsHelper.set24HourFormat(binding.checkbox24Hour.isChecked)
 
         Toast.makeText(this, "Settings saved", Toast.LENGTH_SHORT).show()

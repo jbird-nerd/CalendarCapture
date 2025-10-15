@@ -2,6 +2,8 @@ package com.example.calendarcapture
 
 import android.content.Context
 import android.content.SharedPreferences
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PreferencesHelper(context: Context) {
     private val prefs: SharedPreferences =
@@ -47,5 +49,26 @@ class PreferencesHelper(context: Context) {
 
     fun set24HourFormat(use24Hour: Boolean) {
         prefs.edit().putBoolean("use_24_hour", use24Hour).apply()
+    }
+
+    // Logging functionality
+    fun addLog(message: String, type: String = "INFO") {
+        val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        val logEntry = "[$timestamp] [$type] $message"
+
+        val currentLog = prefs.getString("app_log", "") ?: ""
+        val newLog = "$logEntry\n$currentLog"
+
+        // Keep only last 100 lines
+        val lines = newLog.split("\n").take(100)
+        prefs.edit().putString("app_log", lines.joinToString("\n")).apply()
+    }
+
+    fun getLog(): String {
+        return prefs.getString("app_log", "No logs yet") ?: "No logs yet"
+    }
+
+    fun clearLog() {
+        prefs.edit().putString("app_log", "").apply()
     }
 }

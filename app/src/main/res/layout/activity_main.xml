@@ -30,7 +30,7 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- MINIMAL STATUS - Only shows when processing -->
+            <!-- MINIMAL STATUS -->
             <LinearLayout
                 android:id="@+id/status_container"
                 android:layout_width="match_parent"
@@ -58,7 +58,75 @@
                     android:textColor="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
 
-            <!-- Image Preview - No label, no card wrapper -->
+            <!-- Manual Entry Section -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/manual_entry_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone"
+                app:cardElevation="2dp"
+                app:cardCornerRadius="12dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Enter Event Text or Upload Image"
+                        android:textStyle="bold"
+                        android:textSize="14sp"
+                        android:layout_marginBottom="12dp" />
+
+                    <!-- Text Input -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Paste event text here"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_manual_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minLines="3"
+                            android:maxLines="6"
+                            android:gravity="top"
+                            android:inputType="textMultiLine" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Button Row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_upload_image"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Upload Image"
+                            android:layout_marginEnd="8dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_parse_text"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Parse Text"
+                            style="@style/Widget.Material3.Button" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Image Preview -->
             <ImageView
                 android:id="@+id/image_preview"
                 android:layout_width="match_parent"
@@ -69,8 +137,7 @@
                 android:contentDescription="Event image"
                 android:visibility="gone" />
 
-            <!-- EVENT DETAILS - No labels anywhere -->
-            <!-- EVENT DETAILS - Compact with labels for dates -->
+            <!-- EVENT DETAILS -->
             <LinearLayout
                 android:id="@+id/event_details_card"
                 android:layout_width="match_parent"
@@ -79,7 +146,7 @@
                 android:layout_marginBottom="8dp"
                 android:visibility="gone">
 
-                <!-- Title - Keep the hint -->
+                <!-- Title -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -192,7 +259,7 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <!-- Location - Keep the hint -->
+                <!-- Location -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -229,7 +296,7 @@
                     android:visibility="gone" />
             </LinearLayout>
 
-            <!-- EXTRACTED TEXT - Just the textbox, no label -->
+            <!-- EXTRACTED TEXT -->
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/ocr_text_card"
                 android:layout_width="match_parent"
@@ -256,7 +323,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
-                android:layout_marginTop="4dp">
+                android:layout_marginTop="4dp"
+                android:layout_marginBottom="60dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_add_to_calendar"
@@ -275,6 +343,33 @@
                     android:text="Reprocess"
                     android:visibility="gone"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
+            </LinearLayout>
+
+            <!-- Positive R+D Logo at bottom -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="16dp">
+
+                <ImageView
+                    android:id="@+id/logo_positive_rd_main"
+                    android:layout_width="100dp"
+                    android:layout_height="35dp"
+                    android:src="@drawable/positive"
+                    android:contentDescription="Positive R+D"
+                    android:scaleType="fitCenter"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="positiverandd.com"
+                    android:textSize="10sp"
+                    android:textColor="?attr/colorPrimary"
+                    android:layout_marginTop="2dp" />
             </LinearLayout>
 
         </LinearLayout>
