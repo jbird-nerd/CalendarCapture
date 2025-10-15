@@ -4,9 +4,9 @@ import android.content.Context
 import android.content.SharedPreferences
 
 class PreferencesHelper(context: Context) {
-    private val prefs: SharedPreferences = 
+    private val prefs: SharedPreferences =
         context.getSharedPreferences("CalendarCapturePrefs", Context.MODE_PRIVATE)
-    
+
     fun getSettings(): ApiSettings {
         return ApiSettings(
             ocrMethod = prefs.getString("ocr_method", "mlkit") ?: "mlkit",
@@ -16,7 +16,7 @@ class PreferencesHelper(context: Context) {
             claudeKey = prefs.getString("claude_key", "") ?: ""
         )
     }
-    
+
     fun saveSettings(settings: ApiSettings) {
         prefs.edit().apply {
             putString("ocr_method", settings.ocrMethod)
@@ -27,16 +27,25 @@ class PreferencesHelper(context: Context) {
             apply()
         }
     }
-    
+
     fun saveOcrMethod(method: String) {
         prefs.edit().putString("ocr_method", method).apply()
     }
-    
+
     fun saveParseMethod(method: String) {
         prefs.edit().putString("parse_method", method).apply()
     }
-    
+
     fun saveApiKey(provider: String, key: String) {
         prefs.edit().putString("${provider}_key", key).apply()
+    }
+
+    // Time format preference
+    fun is24HourFormat(): Boolean {
+        return prefs.getBoolean("use_24_hour", false)
+    }
+
+    fun set24HourFormat(use24Hour: Boolean) {
+        prefs.edit().putBoolean("use_24_hour", use24Hour).apply()
     }
 }

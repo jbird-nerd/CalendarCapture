@@ -61,31 +61,48 @@ class ApiService {
 
     private fun buildParsePrompt(text: String): String {
         val now = LocalDateTime.now()
+        val zone = java.util.TimeZone.getDefault()
+        val zoneName = zone.getDisplayName(false, java.util.TimeZone.SHORT)
         val nowStr = now.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
 
         return """
-You are an event extraction assistant. Current date/time: $nowStr
+You are an event extraction assistant. 
+Current local date/time: $nowStr
+Current timezone: $zoneName
+Current day: ${now.dayOfWeek}
 
 Extract event details from the text below into a JSON object with these exact keys:
 {
   "title": "event name",
   "start": "ISO datetime (YYYY-MM-DDTHH:MM:SS)",
   "end": "ISO datetime (YYYY-MM-DDTHH:MM:SS)",
-  "location": "location text (single line, no newlines)",
+  "location": "Venue Name\nStreet Address, City, State ZIP",
   "hasTime": true/false,
   "recurrence": "RRULE format if repeating, empty string otherwise"
 }
 
 CRITICAL RULES:
-1. If no end time/date: add 1 hour to start
-2. If no time specified: set hasTime=false (all-day event)
-3. If time mentioned but no date: if time is after current hour (${now.hour}), use today; else use tomorrow
-4. For "every [day]": use RRULE format: "FREQ=WEEKLY;BYDAY=XX" where XX is MO,TU,WE,TH,FR,SA,SU
-5. For "every day": "FREQ=DAILY"
-6. For "every month": "FREQ=MONTHLY"
-7. Parse natural language: "tomorrow", "next Wednesday", "lunch" means noon
-8. Location must be single line - replace newlines with commas
-9. Return ONLY valid JSON, no markdown, no explanations
+1. ALL TIMES MUST BE IN THE USER'S LOCAL TIMEZONE ($zoneName), NOT UTC OR GMT
+2. If text shows "8:00PM", output "20:00" in the start time, NOT a UTC conversion
+3. ALWAYS provide an end time. If no end time specified: add 1-2 hours to start time (2 hours for events, 1 hour for meetings)
+4. If no time specified: set hasTime=false (all-day event) but still provide end datetime
+5. If time mentioned but no date: if time is after current hour (${now.hour}), use today; else use tomorrow
+6. If ONLY a day of week is mentioned (e.g., "Thursday", "next Wednesday"):
+   - If it says "next [day]", use the next occurrence of that day
+   - If just the day name, use the UPCOMING occurrence (if today is Monday and text says "Thursday", use this coming Thursday)
+   - Set hasTime=false for all-day unless a time is specified
+7. For "every [day]": use RRULE format: "FREQ=WEEKLY;BYDAY=XX" where XX is MO,TU,WE,TH,FR,SA,SU
+8. For "every day": "FREQ=DAILY"
+9. For "every month": "FREQ=MONTHLY"
+10. Parse natural language: "tomorrow", "next Wednesday", "lunch" means 12:00
+11. For location: Format as "Venue Name\nStreet Address, City, State ZIP" on separate lines so Google Maps can parse it properly. If there's a venue name AND an address, put them on separate lines with \n between them.
+12. Return ONLY valid JSON, no markdown, no explanations
+
+Examples:
+- Text: "Meeting Thursday" → start: next Thursday 09:00, end: next Thursday 10:00, hasTime: false
+- Text: "Lunch tomorrow at 1pm" → start: tomorrow 13:00, end: tomorrow 14:00, hasTime: true  
+- Text: "Party Friday 7-9pm at The Cove, 375 S. Prairie Creek Rd" → location: "The Cove\n375 S. Prairie Creek Rd"
+- Text: "Event at 8:00PM-10:00PM" → start: 20:00 same date, end: 22:00 same date
 
 Text to parse:
 ---
@@ -334,7 +351,7 @@ JSON:
             end = json.optString("end", "").takeIf { it.isNotEmpty() }?.let {
                 LocalDateTime.parse(it.substring(0, 19))
             },
-            location = json.optString("location", "").replace("\n", ", "),
+            location = json.optString("location", ""),
             hasTime = json.optBoolean("hasTime", true),
             isAllDay = !json.optBoolean("hasTime", true),
             recurrence = json.optString("recurrence", "")

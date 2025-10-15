@@ -18,8 +18,8 @@
         android:theme="@style/Theme.CalendarCapture"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        
-        <!-- Main Activity - receives shared images -->
+
+        <!-- Main Activity - receives shared images and text -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -28,15 +28,29 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            
+
             <!-- Handle shared images -->
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />
             </intent-filter>
+
+            <!-- Handle shared text (NEW) -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <!-- Handle highlighted text selection (NEW) -->
+            <intent-filter>
+                <action android:name="android.intent.action.PROCESS_TEXT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
-        
+
         <!-- Settings Activity -->
         <activity
             android:name=".SettingsActivity"
