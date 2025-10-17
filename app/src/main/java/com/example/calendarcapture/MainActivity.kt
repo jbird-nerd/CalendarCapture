@@ -4,9 +4,12 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.AnimatedImageDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -22,15 +25,16 @@ import java.time.format.DateTimeFormatter
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val ocrHandler = OcrHandler()
-    private val apiService = ApiService()
+    private val apiService by lazy { ApiService(this) }
     private val calendarHelper = CalendarHelper()
     private val prefsHelper by lazy { PreferencesHelper(this) }
 
     private var currentBitmap: Bitmap? = null
     private var currentOcrText: String = ""
     private var currentEvent: EventData? = null
+    private var isShareFlow: Boolean = false
+    private var isOnFieldsScreen: Boolean = false
 
-    // Image picker launcher
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -48,8 +52,8 @@ class MainActivity : AppCompatActivity() {
 
         setupToolbar()
         setupClickListeners()
+        setupTextWatcher()
 
-        // Handle shared image or text
         val isShare = when (intent?.action) {
             Intent.ACTION_SEND -> {
                 if (intent.type?.startsWith("image/") == true) {
@@ -67,10 +71,11 @@ class MainActivity : AppCompatActivity() {
             else -> false
         }
 
-        // Show manual entry if NOT a share
+        isShareFlow = isShare
+
         if (!isShare) {
-            binding.manualEntryCard.visibility = View.VISIBLE
-            prefsHelper.addLog("App launched directly - showing manual entry", "INFO")
+            showCaptureScreen()
+            prefsHelper.addLog("App launched - showing Capture screen", "INFO")
         }
     }
 
@@ -79,39 +84,26 @@ class MainActivity : AppCompatActivity() {
         supportActionBar?.title = "CalendarCapture"
     }
 
+    private fun setupTextWatcher() {
+        binding.editManualText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: Editable?) {
+                binding.btnParseText.isEnabled = !s.isNullOrEmpty()
+            }
+        })
+    }
+
     private fun setupClickListeners() {
         binding.btnAddToCalendar.setOnClickListener {
             addToCalendar()
         }
 
-        binding.btnReprocess.setOnClickListener {
-            currentOcrText = binding.tvOcrText.text.toString()
-            val settings = prefsHelper.getSettings()
-            showLoading("Reparsing text...")
-
-            lifecycleScope.launch {
-                try {
-                    val event = apiService.performParse(settings.parseMethod, currentOcrText, settings)
-                    currentEvent = event
-                    displayEvent(event)
-                    hideLoading()
-                    prefsHelper.addLog("Reprocessed text successfully", "INFO")
-                } catch (e: Exception) {
-                    hideLoading()
-                    showError("Error reparsing: ${e.message}")
-                    prefsHelper.addLog("Reprocess error: ${e.message}", "ERROR")
-                }
-            }
-        }
-
-        // Manual entry buttons
         binding.btnParseText.setOnClickListener {
             val text = binding.editManualText.text.toString()
             if (text.isNotEmpty()) {
                 binding.manualEntryCard.visibility = View.GONE
                 processText(text)
-            } else {
-                Toast.makeText(this, "Please enter some text", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -120,22 +112,79 @@ class MainActivity : AppCompatActivity() {
             imagePickerLauncher.launch(intent)
         }
 
-        // Logo click
+        binding.btnQuitFields.setOnClickListener {
+            finish()
+        }
+
+        binding.btnReset.setOnClickListener {
+            resetToCaptureScreen()
+        }
+
         binding.logoPositiveRdMain.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://positiverandd.com"))
             startActivity(intent)
         }
     }
 
+    private fun showCaptureScreen() {
+        isOnFieldsScreen = false
+        binding.apply {
+            manualEntryCard.visibility = View.VISIBLE
+            imagePreview.visibility = View.GONE
+            ocrTextCard.visibility = View.GONE
+            eventDetailsCard.visibility = View.GONE
+            fieldsButtons.visibility = View.GONE
+            btnReset.visibility = View.GONE
+            statusContainer.visibility = View.GONE
+        }
+        invalidateOptionsMenu()
+    }
+
+    private fun showFieldsScreen() {
+        isOnFieldsScreen = true
+        binding.apply {
+            manualEntryCard.visibility = View.GONE
+            btnReset.visibility = View.GONE
+        }
+        invalidateOptionsMenu()
+    }
+
+    private fun resetToCaptureScreen() {
+        currentBitmap = null
+        currentOcrText = ""
+        currentEvent = null
+
+        binding.apply {
+            imagePreview.setImageBitmap(null)
+            editManualText.setText("")
+            btnParseText.isEnabled = false
+        }
+
+        showCaptureScreen()
+        prefsHelper.addLog("Reset to Capture screen", "INFO")
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
+
+        // Hide "Capture" option when already on capture screen
+        menu.findItem(R.id.action_capture)?.isVisible = isOnFieldsScreen
+
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_capture -> {
+                resetToCaptureScreen()
+                true
+            }
             R.id.action_settings -> {
                 startActivity(Intent(this, SettingsActivity::class.java))
+                true
+            }
+            R.id.action_quit -> {
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
@@ -180,12 +229,19 @@ class MainActivity : AppCompatActivity() {
     private fun processImage(bitmap: Bitmap) {
         val settings = prefsHelper.getSettings()
 
-        showLoading("Processing image...")
+        // Determine OCR provider based on what was configured in settings
+        val ocrProvider = when (settings.ocrMethod) {
+            "mlkit" -> "ML Kit"
+            "openai-vision" -> "OpenAI Vision"
+            "gemini-vision" -> "Gemini Vision"
+            else -> settings.ocrMethod
+        }
+
+        showLoading("Extracting text with $ocrProvider...", settings.ocrMethod)
         prefsHelper.addLog("Starting OCR with ${settings.ocrMethod}", "INFO")
 
         lifecycleScope.launch {
             try {
-                updateStatus("Extracting text...")
                 val text = when (settings.ocrMethod) {
                     "mlkit" -> ocrHandler.performOcr(bitmap)
                     else -> apiService.performOcr(settings.ocrMethod, bitmap, settings)
@@ -196,20 +252,38 @@ class MainActivity : AppCompatActivity() {
                 binding.ocrTextCard.visibility = View.VISIBLE
 
                 if (text.isEmpty()) {
+                    hideLoading()
                     showError("No text found in image")
                     prefsHelper.addLog("OCR returned empty text", "WARN")
-                    hideLoading()
+                    binding.btnReset.visibility = View.VISIBLE
                     return@launch
                 }
 
                 prefsHelper.addLog("OCR extracted ${text.length} chars", "INFO")
 
-                updateStatus("Parsing event details...")
+                updateStatus("Parsing with ${settings.parseMethod}...", settings.parseMethod)
                 val event = apiService.performParse(settings.parseMethod, text, settings)
                 currentEvent = event
 
-                prefsHelper.addLog("Parsed: ${event.title} on ${event.start}", "INFO")
+                prefsHelper.addLog("Parse result: start=${event.start}, end=${event.end}, title='${event.title}'", "INFO")
 
+                if (event.start == null && event.end == null) {
+                    hideLoading()
+
+                    if (isShareFlow) {
+                        prefsHelper.addLog("Share flow: No date info, going to Fields with empty data", "WARN")
+                        showFieldsScreen()
+                        displayEvent(event)
+                    } else {
+                        showError("No date information found")
+                        prefsHelper.addLog("Capture: No date info, staying on Capture screen", "WARN")
+                        binding.btnReset.visibility = View.VISIBLE
+                    }
+                    return@launch
+                }
+
+                prefsHelper.addLog("Parsed successfully", "INFO")
+                showFieldsScreen()
                 displayEvent(event)
                 hideLoading()
 
@@ -217,11 +291,11 @@ class MainActivity : AppCompatActivity() {
                 hideLoading()
                 showError("Error: ${e.message}")
                 prefsHelper.addLog("Processing error: ${e.message}", "ERROR")
+                binding.btnReset.visibility = View.VISIBLE
                 e.printStackTrace()
             }
         }
     }
-
     private fun processText(text: String) {
         val settings = prefsHelper.getSettings()
 
@@ -229,37 +303,52 @@ class MainActivity : AppCompatActivity() {
         binding.tvOcrText.setText(text)
         binding.ocrTextCard.visibility = View.VISIBLE
 
-        showLoading("Parsing event details...")
+        showLoading("Parsing with ${settings.parseMethod}...", settings.parseMethod)
         prefsHelper.addLog("Parsing text (${text.length} chars) with ${settings.parseMethod}", "INFO")
 
         lifecycleScope.launch {
             try {
                 val event = apiService.performParse(settings.parseMethod, text, settings)
                 currentEvent = event
-                prefsHelper.addLog("Parsed: ${event.title} on ${event.start}", "INFO")
+
+                prefsHelper.addLog("Parse result: start=${event.start}, end=${event.end}, title='${event.title}'", "INFO")
+
+                if (event.start == null && event.end == null) {
+                    hideLoading()
+                    showError("No date information found")
+                    prefsHelper.addLog("Parse found no date/time info - staying on Capture screen", "WARN")
+
+                    // KEEP manual entry card visible so user can try again
+                    binding.manualEntryCard.visibility = View.VISIBLE
+                    binding.btnParseText.isEnabled = true
+                    return@launch
+                }
+
+                // SUCCESS - hide manual entry and show fields
+                binding.manualEntryCard.visibility = View.GONE
+                prefsHelper.addLog("Parsed successfully", "INFO")
+                showFieldsScreen()
                 displayEvent(event)
                 hideLoading()
             } catch (e: Exception) {
                 hideLoading()
                 showError("Error parsing: ${e.message}")
                 prefsHelper.addLog("Parse error: ${e.message}", "ERROR")
+
+                // KEEP manual entry card visible so user can try again
+                binding.manualEntryCard.visibility = View.VISIBLE
+                binding.btnParseText.isEnabled = true
                 e.printStackTrace()
             }
         }
     }
-
     private fun displayEvent(event: EventData) {
-        val use24Hour = prefsHelper.is24HourFormat()
-        val timeFormatter = if (use24Hour) {
-            DateTimeFormatter.ofPattern("HH:mm")
-        } else {
-            DateTimeFormatter.ofPattern("h:mm a")
-        }
+        // Always use 12-hour format
+        val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
 
         binding.apply {
             eventDetailsCard.visibility = View.VISIBLE
-            btnAddToCalendar.visibility = View.VISIBLE
-            btnReprocess.visibility = View.VISIBLE
+            fieldsButtons.visibility = View.VISIBLE
 
             editTitle.setText(event.title)
             editLocation.setText(event.location)
@@ -291,7 +380,7 @@ class MainActivity : AppCompatActivity() {
                 editEndTime.isEnabled = !isChecked
             }
 
-            updateStatus("Ready")
+            updateStatus("Ready", null)
         }
     }
 
@@ -321,13 +410,9 @@ class MainActivity : AppCompatActivity() {
         val event = currentEvent ?: return
 
         try {
-            val use24Hour = prefsHelper.is24HourFormat()
+            // Always use 12-hour format
             val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-            val timeFormatter = if (use24Hour) {
-                DateTimeFormatter.ofPattern("HH:mm")
-            } else {
-                DateTimeFormatter.ofPattern("h:mm a")
-            }
+            val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
 
             val startDate = binding.editStartDate.text.toString()
             val startTime = binding.editStartTime.text.toString()
@@ -371,13 +456,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showLoading(message: String) {
+    private fun showLoading(message: String, llmProvider: String? = null) {
         binding.apply {
             statusContainer.visibility = View.VISIBLE
-            progressBar.visibility = View.VISIBLE
             tvStatus.text = message
+
+            llmProvider?.let { provider ->
+                val gifResId = when {
+                    provider.contains("openai") -> R.drawable.chatgpt
+                    provider.contains("gemini") -> R.drawable.gemini
+                    provider.contains("claude") -> R.drawable.claude
+                    else -> null
+                }
+
+                if (gifResId != null) {
+                    llmLogo.setImageResource(gifResId)
+                    llmLogo.visibility = View.VISIBLE
+                    progressBar.visibility = View.GONE
+
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                        (llmLogo.drawable as? AnimatedImageDrawable)?.start()
+                    }
+                } else {
+                    llmLogo.visibility = View.GONE
+                    progressBar.visibility = View.VISIBLE
+                }
+            } ?: run {
+                llmLogo.visibility = View.GONE
+                progressBar.visibility = View.VISIBLE
+            }
+
             btnAddToCalendar.isEnabled = false
-            btnReprocess.isEnabled = false
         }
     }
 
@@ -385,20 +494,41 @@ class MainActivity : AppCompatActivity() {
         binding.apply {
             statusContainer.visibility = View.GONE
             progressBar.visibility = View.GONE
+            llmLogo.visibility = View.GONE
             btnAddToCalendar.isEnabled = true
-            btnReprocess.isEnabled = true
         }
     }
 
-    private fun updateStatus(message: String) {
+    private fun updateStatus(message: String, llmProvider: String? = null) {
         binding.statusContainer.visibility = View.VISIBLE
         binding.tvStatus.text = message
+        binding.progressBar.visibility = View.GONE
+
+        llmProvider?.let { provider ->
+            val gifResId = when {
+                provider.contains("openai") -> R.drawable.chatgpt
+                provider.contains("gemini") -> R.drawable.gemini
+                provider.contains("claude") -> R.drawable.claude
+                else -> null
+            }
+
+            if (gifResId != null) {
+                binding.llmLogo.setImageResource(gifResId)
+                binding.llmLogo.visibility = View.VISIBLE
+            } else {
+                binding.llmLogo.visibility = View.GONE
+            }
+        } ?: run {
+            binding.llmLogo.visibility = View.GONE
+        }
     }
 
     private fun showError(message: String) {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
         binding.statusContainer.visibility = View.VISIBLE
         binding.tvStatus.text = message
+        binding.progressBar.visibility = View.GONE
+        binding.llmLogo.visibility = View.GONE
     }
 
     override fun onDestroy() {

@@ -15,309 +15,593 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:elevation="4dp"
-            app:titleTextColor="?attr/colorOnPrimary" />
+            app:titleTextColor="?attr/colorOnPrimary"
+            app:navigationIcon="@drawable/ic_arrow_back" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:padding="16dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <!-- OCR Method -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="OCR Method (Image to Text)"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="12dp" />
-
-                    <RadioGroup
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/radio_ocr_mlkit"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Google ML Kit (Free, On-device)"
-                            android:checked="true" />
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/radio_ocr_openai"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="OpenAI Vision" />
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/radio_ocr_gemini"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Gemini Vision" />
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/radio_ocr_claude"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Claude Vision" />
-                    </RadioGroup>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Parse Method -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Parsing Method (Text to Event)"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="12dp" />
-
-                    <RadioGroup
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/radio_parse_openai"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="OpenAI"
-                            android:checked="true" />
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/radio_parse_gemini"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Gemini" />
-
-                        <com.google.android.material.radiobutton.MaterialRadioButton
-                            android:id="@+id/radio_parse_claude"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Claude" />
-                    </RadioGroup>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Display Preferences -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Display Preferences"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="12dp" />
-
-                    <com.google.android.material.checkbox.MaterialCheckBox
-                        android:id="@+id/checkbox_24_hour"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Use 24-hour time format" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- API Keys -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="API Keys"
-                        android:textStyle="bold"
-                        android:textSize="16sp"
-                        android:layout_marginBottom="16dp" />
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="OpenAI API Key"
-                        android:layout_marginBottom="12dp"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/edit_openai_key"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPassword" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Gemini API Key"
-                        android:layout_marginBottom="12dp"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/edit_gemini_key"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPassword" />
-                    </com.google.android.material.textfield.TextInputLayout>
-
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Claude API Key"
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/edit_claude_key"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:inputType="textPassword" />
-                    </com.google.android.material.textfield.TextInputLayout>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Debug Log Viewer -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardElevation="2dp"
-                app:cardCornerRadius="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp">
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Debug Log"
-                            android:textStyle="bold"
-                            android:textSize="16sp" />
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btn_clear_log"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Clear"
-                            style="@style/Widget.Material3.Button.TextButton" />
-                    </LinearLayout>
-
-                    <ScrollView
-                        android:layout_width="match_parent"
-                        android:layout_height="200dp"
-                        android:background="?attr/colorSurfaceVariant">
-
-                        <TextView
-                            android:id="@+id/tv_log"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="8dp"
-                            android:textSize="11sp"
-                            android:fontFamily="monospace"
-                            android:textIsSelectable="true"
-                            android:text="No logs yet" />
-                    </ScrollView>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Save Button -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_save"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Save Settings"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="60dp"
-                style="@style/Widget.Material3.Button" />
-
-            <!-- Positive R+D Logo -->
+            <!-- API KEYS SECTION -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:gravity="center"
-                android:padding="16dp">
-
-                <ImageView
-                    android:id="@+id/logo_positive_rd"
-                    android:layout_width="120dp"
-                    android:layout_height="40dp"
-                    android:src="@drawable/positive"
-                    android:contentDescription="Positive R+D"
-                    android:scaleType="fitCenter"
-                    android:clickable="true"
-                    android:focusable="true" />
+                android:background="#FFF3E0"
+                android:padding="16dp"
+                android:layout_marginBottom="2dp">
 
                 <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🔑 API Keys"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="OpenAI API Key (sk-...)"
+                    android:layout_marginBottom="12dp"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_openai_key"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Google Gemini API Key (AIza...)"
+                    android:layout_marginBottom="12dp"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_gemini_key"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_save_keys"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="positiverandd.com"
-                    android:textSize="11sp"
-                    android:textColor="?attr/colorPrimary"
-                    android:layout_marginTop="4dp" />
+                    android:text="Save Keys"
+                    style="@style/Widget.Material3.Button" />
             </LinearLayout>
+
+            <!-- OCR SECTION -->
+            <!-- OCR SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#E3F2FD"
+                android:padding="16dp"
+                android:layout_marginBottom="2dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📷 OCR Configuration"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Radio Group with direct children -->
+                <RadioGroup
+                    android:id="@+id/radio_group_ocr"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/radio_mlkit"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="ML Kit (Local - No API needed)"
+                        android:textStyle="bold"
+                        android:padding="8dp" />
+
+                    <RadioButton
+                        android:id="@+id/radio_openai_ocr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="OpenAI Vision"
+                        android:textStyle="bold"
+                        android:padding="8dp"
+                        android:visibility="gone" />
+
+                    <RadioButton
+                        android:id="@+id/radio_gemini_ocr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Gemini Vision"
+                        android:textStyle="bold"
+                        android:padding="8dp"
+                        android:visibility="gone" />
+                </RadioGroup>
+
+                <!-- OpenAI OCR Config (separate from radio) -->
+                <LinearLayout
+                    android:id="@+id/ocr_openai_config"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="0dp"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <!-- Row 1: Model dropdown (full width) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinner_openai_ocr_model"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Select model..."
+                            android:inputType="none"
+                            android:textSize="13sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Row 2: Fetch + Test buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_fetch_openai_ocr"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Fetch Models"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="8dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_test_openai_ocr"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Test"
+                            android:textSize="12sp"
+                            android:enabled="false"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Gemini OCR Config (separate from radio) -->
+                <LinearLayout
+                    android:id="@+id/ocr_gemini_config"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="0dp"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <!-- Row 1: Model dropdown (full width) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinner_gemini_ocr_model"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Select model..."
+                            android:inputType="none"
+                            android:textSize="13sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Row 2: Fetch + Test buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_fetch_gemini_ocr"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Fetch Models"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="8dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_test_gemini_ocr"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Test"
+                            android:textSize="12sp"
+                            android:enabled="false"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Test Image Section -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#BBDEFB"
+                    android:layout_marginVertical="16dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Test Image"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/test_image"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:scaleType="centerCrop"
+                        android:background="?attr/colorSurfaceVariant"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="Test image" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_upload_test_image"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Upload Image"
+                            android:layout_marginBottom="8dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <ScrollView
+                            android:layout_width="match_parent"
+                            android:layout_height="100dp"
+                            android:background="?attr/colorSurfaceVariant"
+                            android:padding="8dp"
+                            android:scrollbars="vertical"
+                            android:fadeScrollbars="false">
+
+                            <TextView
+                                android:id="@+id/tv_ocr_result"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="OCR result will appear here..."
+                                android:textSize="12sp"
+                                android:fontFamily="monospace" />
+                        </ScrollView>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+            <!-- PARSE SECTION -->
+            <!-- PARSE SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#E8F5E9"
+                android:padding="16dp"
+                android:layout_marginBottom="2dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🔍 Parse Configuration"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp" />
+
+                <!-- Radio Group with direct children -->
+                <RadioGroup
+                    android:id="@+id/radio_group_parse"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <RadioButton
+                        android:id="@+id/radio_openai_parse"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="OpenAI"
+                        android:textStyle="bold"
+                        android:padding="8dp"
+                        android:visibility="gone" />
+
+                    <RadioButton
+                        android:id="@+id/radio_gemini_parse"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Gemini"
+                        android:textStyle="bold"
+                        android:padding="8dp"
+                        android:visibility="gone" />
+                </RadioGroup>
+
+                <!-- OpenAI Parse Config (separate from radio) -->
+                <LinearLayout
+                    android:id="@+id/parse_openai_config"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="0dp"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <!-- Row 1: Model dropdown (full width) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinner_openai_parse_model"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Select model..."
+                            android:inputType="none"
+                            android:textSize="13sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Row 2: Fetch + Test buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_fetch_openai_parse"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Fetch Models"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="8dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_test_openai_parse"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Test"
+                            android:textSize="12sp"
+                            android:enabled="false"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Gemini Parse Config (separate from radio) -->
+                <LinearLayout
+                    android:id="@+id/parse_gemini_config"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="32dp"
+                    android:paddingEnd="0dp"
+                    android:paddingTop="8dp"
+                    android:visibility="gone">
+
+                    <!-- Row 1: Model dropdown (full width) -->
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="8dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/spinner_gemini_parse_model"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Select model..."
+                            android:inputType="none"
+                            android:textSize="13sp" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <!-- Row 2: Fetch + Test buttons -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_fetch_gemini_parse"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Fetch Models"
+                            android:textSize="12sp"
+                            android:layout_marginEnd="8dp"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_test_gemini_parse"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:text="Test"
+                            android:textSize="12sp"
+                            android:enabled="false"
+                            android:insetTop="0dp"
+                            android:insetBottom="0dp"
+                            style="@style/Widget.Material3.Button.OutlinedButton" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Test Text Section -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#C8E6C9"
+                    android:layout_marginVertical="16dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Test Text"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    style="@style/Widget.Material3.TextInputLayout.FilledBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_test_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Lunch Next wednesday at 11:00 for 45 minutes"
+                        android:minLines="2"
+                        android:inputType="textMultiLine" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Parse Result"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp" />
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:background="?attr/colorSurfaceVariant"
+                    android:padding="8dp"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false">
+
+                    <TextView
+                        android:id="@+id/tv_parse_result"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Parse result will appear here..."
+                        android:textSize="12sp"
+                        android:fontFamily="monospace" />
+                </ScrollView>
+            </LinearLayout>>
+
+            <!-- LOG SECTION -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#FFFFFF"
+                android:padding="16dp"
+                android:layout_marginBottom="2dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="8dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="📋 Debug Log"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_copy_log"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Copy"
+                        android:layout_marginEnd="8dp"
+                        style="@style/Widget.Material3.Button.TextButton" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_clear_log"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Clear"
+                        style="@style/Widget.Material3.Button.TextButton" />
+                </LinearLayout>
+
+                <ScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:background="#263238"
+                    android:padding="12dp"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false">
+
+                    <TextView
+                        android:id="@+id/tv_log"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No logs yet"
+                        android:textSize="11sp"
+                        android:textColor="#AED581"
+                        android:fontFamily="monospace" />
+                </ScrollView>
+            </LinearLayout>
+
+            <!-- Quit Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_quit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Close Settings"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="32dp"
+                style="@style/Widget.Material3.Button" />
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

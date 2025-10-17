@@ -13,7 +13,7 @@
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="match_parent"
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
             app:titleTextColor="?attr/colorOnPrimary" />
@@ -30,23 +30,31 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- MINIMAL STATUS -->
+            <!-- STATUS with animated LLM logo -->
             <LinearLayout
                 android:id="@+id/status_container"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingVertical="2dp"
-                android:layout_marginBottom="6dp"
+                android:paddingVertical="4dp"
+                android:layout_marginBottom="8dp"
                 android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/llm_logo"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:visibility="gone"
+                    android:contentDescription="LLM Logo" />
 
                 <ProgressBar
                     android:id="@+id/progress_bar"
                     style="?android:attr/progressBarStyleSmall"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:layout_marginEnd="6dp"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="8dp"
                     android:visibility="gone" />
 
                 <TextView
@@ -54,11 +62,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="11sp"
+                    android:textSize="12sp"
                     android:textColor="?attr/colorOnSurfaceVariant" />
             </LinearLayout>
 
-            <!-- Manual Entry Section -->
+            <!-- CAPTURE SCREEN: Manual Entry Section -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/manual_entry_card"
                 android:layout_width="match_parent"
@@ -82,7 +90,6 @@
                         android:textSize="14sp"
                         android:layout_marginBottom="12dp" />
 
-                    <!-- Text Input -->
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -97,10 +104,11 @@
                             android:minLines="3"
                             android:maxLines="6"
                             android:gravity="top"
+                            android:scrollbars="vertical"
+                            android:fadeScrollbars="false"
                             android:inputType="textMultiLine" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <!-- Button Row -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -121,6 +129,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:text="Parse Text"
+                            android:enabled="false"
                             style="@style/Widget.Material3.Button" />
                     </LinearLayout>
                 </LinearLayout>
@@ -137,7 +146,29 @@
                 android:contentDescription="Event image"
                 android:visibility="gone" />
 
-            <!-- EVENT DETAILS -->
+            <!-- EXTRACTED TEXT (no fade scrollbar) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/ocr_text_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"
+                style="@style/Widget.Material3.TextInputLayout.FilledBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/tv_ocr_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minLines="3"
+                    android:maxLines="6"
+                    android:scrollbars="vertical"
+                    android:fadeScrollbars="false"
+                    android:gravity="top"
+                    android:textSize="13sp"
+                    android:inputType="textMultiLine" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- FIELDS SCREEN: EVENT DETAILS -->
             <LinearLayout
                 android:id="@+id/event_details_card"
                 android:layout_width="match_parent"
@@ -146,7 +177,6 @@
                 android:layout_marginBottom="8dp"
                 android:visibility="gone">
 
-                <!-- Title -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -163,7 +193,6 @@
                         android:textStyle="bold" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Start: Date Time -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -211,7 +240,6 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <!-- End: Date Time -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -259,7 +287,6 @@
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
-                <!-- Location -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -276,7 +303,6 @@
                         android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- All Day Checkbox -->
                 <com.google.android.material.checkbox.MaterialCheckBox
                     android:id="@+id/checkbox_all_day"
                     android:layout_width="wrap_content"
@@ -285,7 +311,6 @@
                     android:textSize="13sp"
                     android:layout_marginBottom="2dp" />
 
-                <!-- Recurrence Info -->
                 <TextView
                     android:id="@+id/tv_recurrence"
                     android:layout_width="match_parent"
@@ -296,35 +321,16 @@
                     android:visibility="gone" />
             </LinearLayout>
 
-            <!-- EXTRACTED TEXT -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/ocr_text_card"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp"
-                android:visibility="gone"
-                style="@style/Widget.Material3.TextInputLayout.FilledBox">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/tv_ocr_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:minLines="3"
-                    android:maxLines="6"
-                    android:scrollbars="vertical"
-                    android:gravity="top"
-                    android:textSize="13sp"
-                    android:inputType="textMultiLine" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Action Buttons -->
+            <!-- FIELDS SCREEN: Action Buttons -->
             <LinearLayout
+                android:id="@+id/fields_buttons"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center"
                 android:layout_marginTop="4dp"
-                android:layout_marginBottom="60dp">
+                android:layout_marginBottom="8dp"
+                android:visibility="gone">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_add_to_calendar"
@@ -333,19 +339,27 @@
                     android:layout_weight="1"
                     android:text="Add to Calendar"
                     android:layout_marginEnd="8dp"
-                    android:visibility="gone"
                     style="@style/Widget.Material3.Button" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_reprocess"
+                    android:id="@+id/btn_quit_fields"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Reprocess"
-                    android:visibility="gone"
+                    android:text="Quit"
                     style="@style/Widget.Material3.Button.OutlinedButton" />
             </LinearLayout>
 
-            <!-- Positive R+D Logo at bottom -->
+            <!-- CAPTURE SCREEN: Reset Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_reset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Reset"
+                android:layout_marginBottom="60dp"
+                android:visibility="gone"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <!-- Positive R+D Logo -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
